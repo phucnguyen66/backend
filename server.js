@@ -6,7 +6,7 @@ const cors = require("cors");
 const multer = require("multer");
 const streamifier = require("streamifier");
 const fetch = require("node-fetch"); // npm i node-fetch@2
-const { db } = require("../firebase"); // đảm bảo bạn export `db` từ file firebase
+const { db } = require("./firebase"); // đảm bảo bạn export `db` từ file firebase
 const { ref, set, remove, get } = require("firebase/database");
 
 cloudinary.config({
