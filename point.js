@@ -9,7 +9,9 @@ const { v2: cloudinary } = require("cloudinary");
 const { db } = require("./firebase");
 const { ref, get, set, remove } = require("firebase/database");
 const ExcelJS = require("exceljs");
-
+// Middleware
+router.use(cors());
+router.use(bodyParser.json());
 const app = express();
 app.use(cors());
 app.use(express.json());
