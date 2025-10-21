@@ -361,6 +361,5 @@ app.delete("/delete/:classId/:fileId", async (req, res) => {
     return res.status(500).json({ error: "Xóa thất bại", details: err.message });
   }
 });
+module.exports = router;
 
-const PORT = process.env.UPLOAD_PORT|| 3000;
-app.listen(PORT, () => console.log(`✅ Server (upload) running at http://localhost:${PORT}`));
