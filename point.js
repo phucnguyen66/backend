@@ -6,7 +6,7 @@ const multer = require("multer");
 const streamifier = require("streamifier");
 const fetch = require("node-fetch");
 const { v2: cloudinary } = require("cloudinary");
-const { db } = require("../firebase");
+const { db } = require("./firebase");
 const { ref, get, set, remove } = require("firebase/database");
 const ExcelJS = require("exceljs");
 
