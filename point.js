@@ -348,7 +348,4 @@ app.delete("/delete-scores-file/:classId/:assignmentId", async (req, res) => {
     res.status(500).json({ error: "Xoá file điểm thất bại", details: err.message });
   }
 });
-const PORT = process.env.POINT_PORT || 3001;
-app.listen(PORT, () =>
-  console.log(`✅ Point server running at http://localhost:${PORT}`)
-);
+module.exports = router;
