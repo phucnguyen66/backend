@@ -13,9 +13,9 @@ const ExcelJS = require("exceljs");
 router.use(cors());
 router.use(bodyParser.json());
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+router.use(cors());
+router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
 
 // ✅ Cấu hình Cloudinary
 cloudinary.config({
@@ -83,7 +83,7 @@ async function deleteCloudFile(public_id, resource_type = "raw") {
 }
 
 /* 🗑 Xoá toàn bộ lớp */
-app.delete("/delete-class/:classId", async (req, res) => {
+router.delete("/delete-class/:classId", async (req, res) => {
   try {
     const { classId } = req.params;
 
@@ -111,7 +111,7 @@ app.delete("/delete-class/:classId", async (req, res) => {
     res.status(500).json({ error: "Xoá lớp thất bại" });
   }
 });
-app.post("/delete-file", async (req, res) => {
+router.post("/delete-file", async (req, res) => {
   try {
     const { fileUrls } = req.body;
     if (!Array.isArray(fileUrls) || fileUrls.length === 0) {
@@ -140,7 +140,7 @@ app.post("/delete-file", async (req, res) => {
 });
 
 /* 🗑 Xoá bài tập + submissions */
-app.delete("/delete-assignment/:classId/:assignmentId", async (req, res) => {
+router.delete("/delete-assignment/:classId/:assignmentId", async (req, res) => {
   try {
     const { classId, assignmentId } = req.params;
 
@@ -162,7 +162,7 @@ app.delete("/delete-assignment/:classId/:assignmentId", async (req, res) => {
 });
 
 /* ✅ Xuất điểm học sinh ra Excel */
-app.get("/export-scores/:classId/:assignmentId", async (req, res) => {
+router.get("/export-scores/:classId/:assignmentId", async (req, res) => {
   try {
     const { classId, assignmentId } = req.params;
     const snapshot = await get(ref(db, `SUBMISSIONS/${classId}/${assignmentId}`));
@@ -211,7 +211,7 @@ app.get("/export-scores/:classId/:assignmentId", async (req, res) => {
 });
 
 /* ✅ Học sinh tải bài nộp */
-app.get("/downloadSubmission/:classId/:assignmentId/:studentId", async (req, res) => {
+router.get("/downloadSubmission/:classId/:assignmentId/:studentId", async (req, res) => {
   try {
     const { classId, assignmentId, studentId } = req.params;
 
@@ -239,7 +239,7 @@ app.get("/downloadSubmission/:classId/:assignmentId/:studentId", async (req, res
   }
 });
 
-app.post("/upload/:classId/:assignmentId", upload.single("file"), async (req, res) => {
+router.post("/upload/:classId/:assignmentId", upload.single("file"), async (req, res) => {
   try {
     const { classId, assignmentId } = req.params;
     const studentId = getTeacherId(req); // hoặc userId gửi từ client
@@ -293,7 +293,7 @@ app.post("/upload/:classId/:assignmentId", upload.single("file"), async (req, re
 });
 
 /* ✅ Download file qua server, không redirect */
-app.get("/download/:classId/:fileId", async (req, res) => {
+router.get("/download/:classId/:fileId", async (req, res) => {
   try {
     const { classId, fileId } = req.params;
 const fileRef = ref(db, `SUBMISSIONS/${classId}/${assignmentId}/${studentId}/file`);
@@ -331,7 +331,7 @@ const fileRef = ref(db, `SUBMISSIONS/${classId}/${assignmentId}/${studentId}/fil
   }
 });
 /* 🗑 Xoá file điểm của 1 bài tập (theo prefix tên file) */
-app.delete("/delete-scores-file/:classId/:assignmentId", async (req, res) => {
+router.delete("/delete-scores-file/:classId/:assignmentId", async (req, res) => {
   try {
     const { classId, assignmentId } = req.params;
     const prefix = `Scores_${classId}_${assignmentId}`;
