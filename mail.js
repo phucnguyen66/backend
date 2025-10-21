@@ -9,8 +9,8 @@ const app = express();
 router.use(cors());
 router.use(bodyParser.json());
 // Middleware
-app.use(cors());
-app.use(bodyParser.json());
+router.use(cors());
+router.use(bodyParser.json());
 
 // Cấu hình Gmail SMTP
 const transporter = nodemailer.createTransport({
@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // API gửi OTP
-app.post("/send-otp", async (req, res) => {
+router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
   if (!email || !otp)
     return res.status(400).json({ error: "Thiếu email hoặc mã OTP" });
