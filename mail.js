@@ -42,6 +42,5 @@ app.post("/send-otp", async (req, res) => {
   }
 });
 
-app.listen(4000, () =>
-  console.log("✅ Mail Server chạy tại http://localhost:4000")
-);
+module.exports = router;
+
