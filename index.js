@@ -15,6 +15,8 @@ app.use("/upload", uploadRouter);
 app.use("/point", pointRouter);
 app.use("/mail", mailRouter);
 
-module.exports = router;
+// --- Chạy 1 port duy nhất ---
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Main backend running at http://localhost:${PORT}`));
 
 
