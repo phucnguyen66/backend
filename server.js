@@ -76,7 +76,7 @@ function uploadBufferToCloudinary(
 
 
 /* Upload for class files */
-app.post("/upload/:classId", upload.single("file"), async (req, res) => {
+router.post("/upload/:classId", upload.single("file"), async (req, res) => {
   try {
     const { classId } = req.params;
     const teacherId = getTeacherId(req);
@@ -151,7 +151,7 @@ app.post("/upload/:classId", upload.single("file"), async (req, res) => {
 });
 
 /* ✅ Upload for assignment (classId + assignmentId) */
-app.post("/upload/:classId/:assignmentId", upload.single("file"), async (req, res) => {
+router.post("/upload/:classId/:assignmentId", upload.single("file"), async (req, res) => {
   try {
     const { classId, assignmentId } = req.params;
     const teacherId = getTeacherId(req);
@@ -228,7 +228,7 @@ app.post("/upload/:classId/:assignmentId", upload.single("file"), async (req, re
 
 
 /* ✅ Download - luôn stream qua server, không redirect */
-app.get("/download/:classId/:fileId", async (req, res) => {
+router.get("/download/:classId/:fileId", async (req, res) => {
   try {
     const { classId, fileId } = req.params;
     const fileRef = ref(db, `CLASS_IF/${classId}/files/${fileId}`);
@@ -276,7 +276,7 @@ app.get("/download/:classId/:fileId", async (req, res) => {
 /* ===================================================
    🗑️ Xóa toàn bộ file Cloudinary (cho giáo viên xóa lớp)
    =================================================== */
-app.post("/delete-file", async (req, res) => {
+router.post("/delete-file", async (req, res) => {
   try {
     const { fileUrls } = req.body;
 
