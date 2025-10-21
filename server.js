@@ -8,7 +8,9 @@ const streamifier = require("streamifier");
 const fetch = require("node-fetch"); // npm i node-fetch@2
 const { db } = require("./firebase"); // đảm bảo bạn export `db` từ file firebase
 const { ref, set, remove, get } = require("firebase/database");
-
+// Middleware
+router.use(cors());
+router.use(bodyParser.json());
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
