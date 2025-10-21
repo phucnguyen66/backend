@@ -18,9 +18,9 @@ cloudinary.config({
 });
 
 const app = express();
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+router.use(cors());
+router.use(express.json());
+router.use(express.urlencoded({ extended: true }));
 
 // Multer memory (RAM)
 const upload = multer({
@@ -341,7 +341,7 @@ router.post("/delete-file", async (req, res) => {
 });
 
 /* Delete file */
-app.delete("/delete/:classId/:fileId", async (req, res) => {
+router.delete("/delete/:classId/:fileId", async (req, res) => {
   try {
     const { classId, fileId } = req.params;
     const fileRef = ref(db, `CLASS_IF/${classId}/files/${fileId}`);
