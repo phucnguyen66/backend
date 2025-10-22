@@ -1,37 +1,36 @@
-// mail.js
 require("dotenv").config();
 const express = require("express");
-const { Resend } = require("resend");
-
+const nodemailer = require("nodemailer");
 const router = express.Router();
-const resend = new Resend(process.env.RESEND_API_KEY);
 
-// 📩 Gửi OTP qua email
+// 📬 Tạo transporter Gmail
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
+// 📩 Gửi OTP
 router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
-  if (!email || !otp) {
+  if (!email || !otp)
     return res.status(400).json({ error: "Thiếu email hoặc mã OTP" });
-  }
+
+  const mailOptions = {
+    from: process.env.GMAIL_USER,
+    to: email,
+    subject: "Mã xác minh tài khoản",
+    text: `Mã xác minh của bạn là: ${otp}\nHiệu lực 5 phút.`,
+  };
 
   try {
-    const response = await resend.emails.send({
-      from: process.env.FROM_EMAIL,
-      to: email,
-      subject: "Mã xác minh tài khoản",
-      html: `
-        <div style="font-family:sans-serif;line-height:1.6">
-          <h2>Xin chào 👋</h2>
-          <p>Mã xác minh của bạn là:</p>
-          <h1 style="color:#0b66ff">${otp}</h1>
-          <p>Mã có hiệu lực trong 5 phút.</p>
-        </div>
-      `,
-    });
-
-    console.log("✅ Email gửi thành công:", response);
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Gửi OTP đến ${email}`);
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Lỗi gửi mail qua Resend:", err);
+    console.error("❌ Lỗi gửi email:", err);
     res.status(500).json({ error: "Không gửi được email", details: err.message });
   }
 });
