@@ -1,40 +1,40 @@
-// mail.js
-require('dotenv').config();
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const nodemailer = require('nodemailer');
+const axios = require("axios");
 
-const { GMAIL_USER, GMAIL_APP_PASSWORD } = process.env;
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: GMAIL_USER,
-    pass: GMAIL_APP_PASSWORD,
-  },
-});
-
-router.post('/send-otp', async (req, res) => {
+router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res.status(400).json({ error: 'Thiếu email hoặc mã OTP' });
-  }
-
-  const mailOptions = {
-    from: GMAIL_USER,
-    to: email,
-    subject: 'Mã xác minh tài khoản',
-    text: `Mã xác minh của bạn là: ${otp}\nMã có hiệu lực trong 5 phút.`,
-  };
+  if (!email || !otp) return res.status(400).json({ error: "Thiếu email hoặc OTP" });
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Gửi OTP đến ${email}`);
+    await axios.post(
+      "https://api.sendgrid.com/v3/mail/send",
+      {
+        personalizations: [{ to: [{ email }] }],
+        from: { email: "phuc55108@gmail.com", name: "Point System" },
+        subject: "Mã xác minh tài khoản",
+        content: [
+          {
+            type: "text/plain",
+            value: `Mã xác minh của bạn là: ${otp}\nMã có hiệu lực 5 phút.`,
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${SENDGRID_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log(`✅ Gửi OTP qua SendGrid đến ${email}`);
     res.json({ success: true });
   } catch (err) {
-    console.error('❌ Lỗi gửi email:', err);
-    res.status(500).json({ error: 'Không gửi được email', details: err.message });
+    console.error("❌ Lỗi gửi SendGrid:", err.response?.data || err.message);
+    res.status(500).json({ error: "Không gửi được email", details: err.message });
   }
 });
 
