@@ -1,42 +1,41 @@
+// mail.js
+require("dotenv").config();
 const express = require("express");
+const { Resend } = require("resend");
+
 const router = express.Router();
-const Mailjet = require("node-mailjet");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ⚙️ Kết nối Mailjet bằng API key
-const mailjet = Mailjet.apiConnect(
-  process.env.MJ_APIKEY_PUBLIC,
-  process.env.MJ_APIKEY_PRIVATE
-);
-
-// 📩 Gửi OTP
+// 📩 Gửi OTP qua email
 router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
-
   if (!email || !otp) {
     return res.status(400).json({ error: "Thiếu email hoặc mã OTP" });
   }
 
   try {
-    const result = await mailjet.post("send", { version: "v3.1" }).request({
-      Messages: [
-        {
-          From: {
-            Email: process.env.FROM_EMAIL || "no-reply@mailjet.com",
-            Name: "Point System",
-          },
-          To: [{ Email: email }],
-          Subject: "Mã xác minh tài khoản",
-          TextPart: `Mã xác minh của bạn là ${otp}. Mã có hiệu lực trong 5 phút.`,
-          HTMLPart: `<p>Mã xác minh của bạn là <strong>${otp}</strong>.</p><p>Mã có hiệu lực trong 5 phút.</p>`,
-        },
-      ],
+    const response = await resend.emails.send({
+      from: process.env.FROM_EMAIL,
+      to: email,
+      subject: "Mã xác minh tài khoản",
+      html: `
+        <div style="font-family:sans-serif;line-height:1.5">
+          <h2>Xin chào 👋</h2>
+          <p>Mã xác minh của bạn là:</p>
+          <h1 style="color:#0b66ff">${otp}</h1>
+          <p>Mã có hiệu lực trong 5 phút.</p>
+        </div>
+      `,
     });
 
-    console.log("✅ Mailjet response:", result.body);
+    console.log("✅ Email sent:", response);
     res.json({ success: true });
-  } catch (err) {
-    console.error("❌ Lỗi gửi mail qua Mailjet:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+  } catch (error) {
+    console.error("❌ Lỗi gửi mail qua Resend:", error);
+    res.status(500).json({
+      error: "Không gửi được email",
+      details: error.message,
+    });
   }
 });
 
