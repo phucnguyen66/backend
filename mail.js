@@ -19,7 +19,7 @@ router.post("/send-otp", async (req, res) => {
       to: email,
       subject: "Mã xác minh tài khoản",
       html: `
-        <div style="font-family:sans-serif;line-height:1.5">
+        <div style="font-family:sans-serif;line-height:1.6">
           <h2>Xin chào 👋</h2>
           <p>Mã xác minh của bạn là:</p>
           <h1 style="color:#0b66ff">${otp}</h1>
@@ -28,14 +28,11 @@ router.post("/send-otp", async (req, res) => {
       `,
     });
 
-    console.log("✅ Email sent:", response);
+    console.log("✅ Email gửi thành công:", response);
     res.json({ success: true });
-  } catch (error) {
-    console.error("❌ Lỗi gửi mail qua Resend:", error);
-    res.status(500).json({
-      error: "Không gửi được email",
-      details: error.message,
-    });
+  } catch (err) {
+    console.error("❌ Lỗi gửi mail qua Resend:", err);
+    res.status(500).json({ error: "Không gửi được email", details: err.message });
   }
 });
 
