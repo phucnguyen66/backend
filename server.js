@@ -10,6 +10,8 @@ const streamifier = require("streamifier");
 const fetch = require("node-fetch"); // npm i node-fetch@2
 const { db } = require("./firebase"); // đảm bảo bạn export `db` từ file firebase
 const { ref, set, remove, get } = require("firebase/database");
+const bodyParser = require("body-parser"); // ✅ THÊM DÒNG NÀY
+
 // Middleware
 router.use(cors());
 router.use(bodyParser.json());
