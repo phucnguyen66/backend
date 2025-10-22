@@ -1,8 +1,10 @@
 // point.js
-require("dotenv").config({ path: "../.env" });
+require("dotenv").config({ path: "./.env" });
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
+const bodyParser = require("body-parser");
+
 const streamifier = require("streamifier");
 const fetch = require("node-fetch");
 const { v2: cloudinary } = require("cloudinary");
