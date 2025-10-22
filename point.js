@@ -10,6 +10,8 @@ const { db } = require("./firebase");
 const { ref, get, set, remove } = require("firebase/database");
 const ExcelJS = require("exceljs");
 // Middleware
+const router = express.Router(); // thêm dòng này ✅
+
 router.use(cors());
 router.use(bodyParser.json());
 const app = express();
