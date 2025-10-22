@@ -1,9 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { Resend } = require("resend");
+const Mailjet = require("node-mailjet");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// ⚙️ Kết nối Mailjet bằng API key
+const mailjet = Mailjet.apiConnect(
+  process.env.MJ_APIKEY_PUBLIC,
+  process.env.MJ_APIKEY_PRIVATE
+);
 
+// 📩 Gửi OTP
 router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
 
@@ -12,18 +17,26 @@ router.post("/send-otp", async (req, res) => {
   }
 
   try {
-    await resend.emails.send({
-      from: process.env.FROM_EMAIL, // “Point System <onboarding@resend.dev>”
-      to: email,
-      subject: "Mã xác minh tài khoản",
-      text: `Mã xác minh của bạn là: ${otp}\nMã có hiệu lực trong 5 phút.`,
+    const result = await mailjet.post("send", { version: "v3.1" }).request({
+      Messages: [
+        {
+          From: {
+            Email: process.env.FROM_EMAIL || "no-reply@mailjet.com",
+            Name: "Point System",
+          },
+          To: [{ Email: email }],
+          Subject: "Mã xác minh tài khoản",
+          TextPart: `Mã xác minh của bạn là ${otp}. Mã có hiệu lực trong 5 phút.`,
+          HTMLPart: `<p>Mã xác minh của bạn là <strong>${otp}</strong>.</p><p>Mã có hiệu lực trong 5 phút.</p>`,
+        },
+      ],
     });
 
-    console.log(`✅ Gửi OTP đến ${email}`);
+    console.log("✅ Mailjet response:", result.body);
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Lỗi gửi email:", err.message);
-    res.status(500).json({ error: "Không gửi được email", details: err.message });
+    console.error("❌ Lỗi gửi mail qua Mailjet:", err.message);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
