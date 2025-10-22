@@ -2,6 +2,8 @@
 require('dotenv').config({ path: '../.env' }); // ../ trỏ lên một cấp
 const cloudinary = require('cloudinary').v2;
 const express = require("express");
+const router = express.Router(); // thêm dòng này ✅
+
 const cors = require("cors");
 const multer = require("multer");
 const streamifier = require("streamifier");
