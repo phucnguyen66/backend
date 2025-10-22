@@ -1,49 +1,33 @@
+// mail.js
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 
 const router = express.Router();
-
-// Middleware
 router.use(cors());
 router.use(bodyParser.json());
 
-// ⚙️ Cấu hình Gmail SMTP
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER, // thêm vào .env
-    pass: process.env.GMAIL_APP_PASSWORD, // app password
-  },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-// ✅ API gửi OTP
 router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ error: "Thiếu email hoặc OTP" });
 
-  if (!email || !otp) {
-    return res.status(400).json({ error: "Thiếu email hoặc mã OTP" });
-  }
-
-  const mailOptions = {
-    from: `"Learning System" <${process.env.GMAIL_USER}>`,
+  const msg = {
     to: email,
+    from: "phuc55108@gmail.com", // email đã xác minh trên SendGrid
     subject: "Mã xác minh tài khoản",
-    text: `Mã xác minh của bạn là: ${otp}\n\nMã có hiệu lực trong 5 phút.`,
+    text: `Mã xác minh của bạn là: ${otp}\nMã có hiệu lực 5 phút.`,
   };
 
   try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`📧 Gửi OTP thành công đến: ${email}`);
-    console.log("Message ID:", info.messageId);
+    await sgMail.send(msg);
+    console.log(`📧 OTP gửi đến: ${email}`);
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Lỗi gửi email:", err);
-    res.status(500).json({
-      error: "Không gửi được email.",
-      message: err.message,
-    });
+    console.error("❌ Lỗi gửi email:", err.response?.body || err);
+    res.status(500).json({ error: "Không gửi được email", details: err.response?.body });
   }
 });
 
