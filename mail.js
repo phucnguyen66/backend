@@ -1,49 +1,50 @@
-// mail.js (CommonJS)
 const express = require("express");
-const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 const cors = require("cors");
-const router = express.Router(); // thêm dòng này ✅
+const nodemailer = require("nodemailer");
 
-const app = express();
-// Middleware
-router.use(cors());
-router.use(bodyParser.json());
+const router = express.Router();
+
 // Middleware
 router.use(cors());
 router.use(bodyParser.json());
 
-// Cấu hình Gmail SMTP
+// ⚙️ Cấu hình Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "phuc55108@gmail.com", // Gmail gửi OTP
-    pass: "fwti oiwc hfty jxda", // app password
+    user: process.env.GMAIL_USER, // thêm vào .env
+    pass: process.env.GMAIL_APP_PASSWORD, // app password
   },
 });
 
-// API gửi OTP
+// ✅ API gửi OTP
 router.post("/send-otp", async (req, res) => {
   const { email, otp } = req.body;
-  if (!email || !otp)
+
+  if (!email || !otp) {
     return res.status(400).json({ error: "Thiếu email hoặc mã OTP" });
+  }
 
   const mailOptions = {
-    from: "Learning <phuc55108@gmail.com>",
+    from: `"Learning System" <${process.env.GMAIL_USER}>`,
     to: email,
     subject: "Mã xác minh tài khoản",
     text: `Mã xác minh của bạn là: ${otp}\n\nMã có hiệu lực trong 5 phút.`,
   };
 
   try {
-    await transporter.sendMail(mailOptions);
+    const info = await transporter.sendMail(mailOptions);
     console.log(`📧 Gửi OTP thành công đến: ${email}`);
+    console.log("Message ID:", info.messageId);
     res.json({ success: true });
   } catch (err) {
-    console.error("❌ Lỗi gửi email:", err.message);
-    res.status(500).json({ error: "Không gửi được email." });
+    console.error("❌ Lỗi gửi email:", err);
+    res.status(500).json({
+      error: "Không gửi được email.",
+      message: err.message,
+    });
   }
 });
 
 module.exports = router;
-
