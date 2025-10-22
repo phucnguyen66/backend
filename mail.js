@@ -3,6 +3,7 @@ const express = require("express");
 const nodemailer = require("nodemailer");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const router = express.Router(); // thêm dòng này ✅
 
 const app = express();
 // Middleware
