@@ -1,12 +1,15 @@
 {
   "name": "backend",
   "version": "1.0.0",
+  "description": "Point backend with mail sending & Firebase integration",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
     "@sendgrid/mail": "^8.1.6",
+    "axios": "^1.6.8",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -23,5 +26,8 @@
     "nodemailer": "^7.0.9",
     "resend": "^6.2.2",
     "streamifier": "^0.1.1"
+  },
+  "engines": {
+    "node": ">=18.x"
   }
 }
