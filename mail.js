@@ -1,6 +1,6 @@
 // mail.js
 const express = require("express");
-const axios = require("axios");
+const nodemailer = require("nodemailer");
 require("dotenv").config();
 
 const router = express.Router();
@@ -8,45 +8,28 @@ const router = express.Router();
 router.post("/send-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ error: "Thiếu email hoặc otp" });
 
-    if (!email) {
-      return res.status(400).json({ error: "Thiếu địa chỉ email" });
-    }
-
-    // ✉️ Nội dung email gửi OTP
-    const subject = "Mã xác thực OTP từ Point App";
-    const message = `
-      <div style="font-family:sans-serif;padding:12px;">
-        <h2>🔐 Xác thực Email</h2>
-        <p>Xin chào,</p>
-        <p>Mã OTP của bạn là:</p>
-        <h1 style="color:#0b66ff;letter-spacing:4px;">${otp}</h1>
-        <p>Mã có hiệu lực trong 5 phút.</p>
-      </div>
-    `;
-
-    // 🚀 Gửi mail qua Brevo API
-    const response = await axios.post(
-      "https://api.brevo.com/v3/smtp/email",
-      {
-        sender: { email: process.env.FROM_EMAIL, name: "Point App" },
-        to: [{ email }],
-        subject,
-        htmlContent: message,
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_PASS, // App Password
       },
-      {
-        headers: {
-          "api-key": process.env.BREVO_API_KEY,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    });
 
-    console.log("✅ Email sent:", response.data);
-    res.json({ success: true, data: response.data });
+    const mailOptions = {
+      from: `"Point App" <${process.env.GMAIL_USER}>`,
+      to: email,
+      subject: "Mã xác thực OTP",
+      html: `<h2>Your OTP</h2><h1>${otp}</h1><p>Valid 5 minutes</p>`,
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true });
   } catch (err) {
-    console.error("❌ Error sending email:", err.response?.data || err.message);
-    res.status(500).json({ error: err.response?.data || err.message });
+    console.error("Send failed:", err);
+    res.status(500).json({ error: err.message || "Send error" });
   }
 });
 
