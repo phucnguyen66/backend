@@ -5,35 +5,54 @@ require("dotenv").config();
 
 const router = express.Router();
 
+/**
+ * 📩 Gửi OTP qua email
+ * Body nhận từ frontend:
+ * {
+ *   "recipients": ["email1@gmail.com", "email2@gmail.com"],
+ *   "subject": "Tiêu đề email",
+ *   "message": "<p>Nội dung HTML...</p>"
+ * }
+ */
 router.post("/send-otp", async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { recipients, subject, message } = req.body;
 
-    if (!email || !otp) {
-      return res.status(400).json({ success: false, error: "Thiếu email hoặc mã OTP" });
+    // ✅ Kiểm tra dữ liệu đầu vào
+    if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Thiếu danh sách email người nhận." });
     }
 
+    // ✅ Tạo transporter Gmail
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.FROM_EMAIL,
-        pass: process.env.GMAIL_APP_PASS,
+        user: process.env.FROM_EMAIL,      // địa chỉ Gmail của bạn
+        pass: process.env.GMAIL_APP_PASS,  // app password (không phải mật khẩu thường)
       },
     });
 
-    const info = await transporter.sendMail({
+    // ✅ Cấu hình email
+    const mailOptions = {
       from: `"Point App" <${process.env.FROM_EMAIL}>`,
-      to: email,
-      subject: "Mã xác minh từ Point App",
-      html: `<p>Mã xác minh của bạn là: <b>${otp}</b></p>`,
-    });
+      to: recipients.join(", "), // nối thành chuỗi
+      subject: subject || "Mã xác minh từ Point App",
+      html: message || "<p>Không có nội dung</p>",
+    };
+
+    // ✅ Gửi mail
+    const info = await transporter.sendMail(mailOptions);
 
     console.log("✅ Email sent:", info.response);
-    res.json({ success: true });
+    return res.json({ success: true, message: "Email đã được gửi thành công!" });
   } catch (err) {
     console.error("❌ Error sending email:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    return res
+      .status(500)
+      .json({ success: false, error: "Gửi email thất bại: " + err.message });
   }
 });
 
-module.exports = router; // <-- cực kỳ quan trọng
+module.exports = router;
