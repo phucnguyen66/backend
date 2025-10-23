@@ -5,21 +5,32 @@ require("dotenv").config();
 
 const router = express.Router();
 
-// 🧩 API gửi mail
 router.post("/send-otp", async (req, res) => {
   try {
-    const { recipients, subject, message } = req.body;
+    const { email, otp } = req.body;
 
-    if (!recipients || recipients.length === 0) {
-      return res.status(400).json({ error: "Thiếu danh sách người nhận" });
+    if (!email) {
+      return res.status(400).json({ error: "Thiếu địa chỉ email" });
     }
 
-    // Gửi mail qua Brevo
+    // ✉️ Nội dung email gửi OTP
+    const subject = "Mã xác thực OTP từ Point App";
+    const message = `
+      <div style="font-family:sans-serif;padding:12px;">
+        <h2>🔐 Xác thực Email</h2>
+        <p>Xin chào,</p>
+        <p>Mã OTP của bạn là:</p>
+        <h1 style="color:#0b66ff;letter-spacing:4px;">${otp}</h1>
+        <p>Mã có hiệu lực trong 5 phút.</p>
+      </div>
+    `;
+
+    // 🚀 Gửi mail qua Brevo API
     const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
         sender: { email: process.env.FROM_EMAIL, name: "Point App" },
-        to: recipients.map((email) => ({ email })),
+        to: [{ email }],
         subject,
         htmlContent: message,
       },
@@ -35,9 +46,8 @@ router.post("/send-otp", async (req, res) => {
     res.json({ success: true, data: response.data });
   } catch (err) {
     console.error("❌ Error sending email:", err.response?.data || err.message);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.response?.data || err.message });
   }
 });
 
-// 👇 Quan trọng: export router cho Express
 module.exports = router;
