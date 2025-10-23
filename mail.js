@@ -1,49 +1,30 @@
 // mail.js
-import nodemailer from "nodemailer";
-import { google } from "googleapis";
+import axios from "axios";
+import dotenv from "dotenv";
+dotenv.config();
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
-const USER = process.env.GMAIL_USER;
-const REDIRECT_URI = "https://developers.google.com/oauthplayground";
-
-// OAuth2 setup
-const oAuth2Client = new google.auth.OAuth2(
-  CLIENT_ID,
-  CLIENT_SECRET,
-  REDIRECT_URI
-);
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
-
-export async function sendGmail(toList, subject, html) {
+export async function sendEmail(to, subject, html) {
   try {
-    const accessToken = await oAuth2Client.getAccessToken();
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        type: "OAuth2",
-        user: USER,
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        refreshToken: REFRESH_TOKEN,
-        accessToken: accessToken.token,
+    const res = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { email: process.env.FROM_EMAIL, name: "Point App" },
+        to: to.map((email) => ({ email })),
+        subject,
+        htmlContent: html,
       },
-    });
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    const mailOptions = {
-      from: `Phuc App <${USER}>`,
-      bcc: toList, // gửi ẩn danh cho nhiều người
-      subject,
-      html,
-    };
-
-    const result = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent:", result.accepted);
-    return result;
+    console.log("✅ Email sent:", res.data);
+    return res.data;
   } catch (err) {
-    console.error("❌ Error sending mail:", err.message);
+    console.error("❌ Error sending email:", err.response?.data || err.message);
     throw err;
   }
 }
