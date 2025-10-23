@@ -28,7 +28,8 @@ function makeRawEmail({ from, to, subject, html, text }) {
   msgLines.push(`To: ${to}`);
   msgLines.push(`Subject: ${subject}`);
   msgLines.push("MIME-Version: 1.0");
-  msgLines.push(`Content-Type: multipart/alternative; boundary="${boundary}"`);
+msgLines.push(`Content-Type: multipart/alternative; boundary="${boundary}"; charset="UTF-8"`);
+msgLines.push("Content-Transfer-Encoding: 8bit");
   msgLines.push("");
   msgLines.push(`--${boundary}`);
   msgLines.push("Content-Type: text/plain; charset=UTF-8");
