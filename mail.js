@@ -6,7 +6,7 @@ require("dotenv").config();
 const router = express.Router();
 
 // 🧩 API gửi mail
-router.post("/send", async (req, res) => {
+router.post("/send-otp", async (req, res) => {
   try {
     const { recipients, subject, message } = req.body;
 
