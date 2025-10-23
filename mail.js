@@ -1,17 +1,27 @@
 // mail.js
-import axios from "axios";
-import dotenv from "dotenv";
-dotenv.config();
+const express = require("express");
+const axios = require("axios");
+require("dotenv").config();
 
-export async function sendEmail(to, subject, html) {
+const router = express.Router();
+
+// 🧩 API gửi mail
+router.post("/send", async (req, res) => {
   try {
-    const res = await axios.post(
+    const { recipients, subject, message } = req.body;
+
+    if (!recipients || recipients.length === 0) {
+      return res.status(400).json({ error: "Thiếu danh sách người nhận" });
+    }
+
+    // Gửi mail qua Brevo
+    const response = await axios.post(
       "https://api.brevo.com/v3/smtp/email",
       {
         sender: { email: process.env.FROM_EMAIL, name: "Point App" },
-        to: to.map((email) => ({ email })),
+        to: recipients.map((email) => ({ email })),
         subject,
-        htmlContent: html,
+        htmlContent: message,
       },
       {
         headers: {
@@ -21,10 +31,13 @@ export async function sendEmail(to, subject, html) {
       }
     );
 
-    console.log("✅ Email sent:", res.data);
-    return res.data;
+    console.log("✅ Email sent:", response.data);
+    res.json({ success: true, data: response.data });
   } catch (err) {
     console.error("❌ Error sending email:", err.response?.data || err.message);
-    throw err;
+    res.status(500).json({ error: err.message });
   }
-}
+});
+
+// 👇 Quan trọng: export router cho Express
+module.exports = router;
