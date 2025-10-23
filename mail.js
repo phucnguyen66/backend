@@ -29,8 +29,8 @@ router.post("/send-otp", async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: process.env.FROM_EMAIL,      // địa chỉ Gmail của bạn
-        pass: process.env.GMAIL_APP_PASS,  // app password (không phải mật khẩu thường)
+        user: process.env.GMAIL_USER,      // địa chỉ Gmail của bạn
+        pass: process.env.GMAIL_PASS,  // app password (không phải mật khẩu thường)
       },
     });
 
