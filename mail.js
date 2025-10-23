@@ -1,38 +1,49 @@
-require("dotenv").config();
-const express = require("express");
-const nodemailer = require("nodemailer");
-const router = express.Router();
+// mail.js
+import nodemailer from "nodemailer";
+import { google } from "googleapis";
 
-// 📬 Tạo transporter Gmail
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN;
+const USER = process.env.GMAIL_USER;
+const REDIRECT_URI = "https://developers.google.com/oauthplayground";
 
-// 📩 Gửi OTP
-router.post("/send-otp", async (req, res) => {
-  const { email, otp } = req.body;
-  if (!email || !otp)
-    return res.status(400).json({ error: "Thiếu email hoặc mã OTP" });
+// OAuth2 setup
+const oAuth2Client = new google.auth.OAuth2(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  REDIRECT_URI
+);
+oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
 
-  const mailOptions = {
-    from: process.env.GMAIL_USER,
-    to: email,
-    subject: "Mã xác minh tài khoản",
-    text: `Mã xác minh của bạn là: ${otp}\nHiệu lực 5 phút.`,
-  };
-
+export async function sendGmail(toList, subject, html) {
   try {
-    await transporter.sendMail(mailOptions);
-    console.log(`✅ Gửi OTP đến ${email}`);
-    res.json({ success: true });
-  } catch (err) {
-    console.error("❌ Lỗi gửi email:", err);
-    res.status(500).json({ error: "Không gửi được email", details: err.message });
-  }
-});
+    const accessToken = await oAuth2Client.getAccessToken();
 
-module.exports = router;
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        type: "OAuth2",
+        user: USER,
+        clientId: CLIENT_ID,
+        clientSecret: CLIENT_SECRET,
+        refreshToken: REFRESH_TOKEN,
+        accessToken: accessToken.token,
+      },
+    });
+
+    const mailOptions = {
+      from: `Phuc App <${USER}>`,
+      bcc: toList, // gửi ẩn danh cho nhiều người
+      subject,
+      html,
+    };
+
+    const result = await transporter.sendMail(mailOptions);
+    console.log("✅ Email sent:", result.accepted);
+    return result;
+  } catch (err) {
+    console.error("❌ Error sending mail:", err.message);
+    throw err;
+  }
+}
