@@ -22,6 +22,7 @@
     "node-mailjet": "^6.0.9",
     "nodemailer": "^7.0.9",
     "resend": "^6.2.2",
-    "streamifier": "^0.1.1"
+    "streamifier": "^0.1.1",
+    "xlsx": "^0.18.5"
   }
 }
