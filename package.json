@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@sendgrid/mail": "^8.1.6",
+    "cloudinary": "^1.41.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.21.2",
+    "firebase": "^9.22.0",
+    "firebase-admin": "^13.5.0",
+    "form-data": "^4.0.4",
+    "googleapis": "^164.1.0",
+    "mailgun.js": "^12.1.1",
+    "multer": "^1.4.5-lts.1",
+    "node-fetch": "^2.7.0",
+    "node-mailjet": "^6.0.9",
+    "nodemailer": "^7.0.9",
+    "resend": "^6.2.2",
+    "streamifier": "^0.1.1"
+  }
+}
