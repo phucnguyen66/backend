@@ -1,52 +1,63 @@
 // mail.js
 const express = require("express");
-const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
 require("dotenv").config();
 
 const router = express.Router();
 
-// Tạo transporter dùng SMTP + App Password
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // TLS
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_PASS, // App Password
-  },
-});
+const oAuth2Client = new google.auth.OAuth2(
+  process.env.GMAIL_CLIENT_ID,
+  process.env.GMAIL_CLIENT_SECRET,
+  "http://localhost/"
+);
+oAuth2Client.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
 
-// API gửi OTP
+function makeEmail({ from, to, subject, html }) {
+  const lines = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${subject}`,
+    "MIME-Version: 1.0",
+    'Content-Type: text/html; charset="UTF-8"',
+    "",
+    html,
+  ];
+  const raw = Buffer.from(lines.join("\r\n"))
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+  return raw;
+}
+
 router.post("/send-otp", async (req, res) => {
   try {
-    // Hỗ trợ cả 2 format
     let recipients = req.body.recipients;
     if (!recipients && req.body.email) {
       recipients = [req.body.email];
     }
 
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: "Thiếu email người nhận",
-      });
+      return res.status(400).json({ success: false, error: "Thiếu email" });
     }
 
-    const subject = req.body.subject || "Mã OTP Point App";
-    const message = req.body.message || "Mã OTP của bạn là: 123456";
-
-    await transporter.sendMail({
-      from: `"Point App" <${process.env.GMAIL_USER}>`,
+    const gmail = google.gmail({ version: "v1", auth: oAuth2Client });
+    const raw = makeEmail({
+      from: process.env.GMAIL_USER,
       to: recipients.join(", "),
-      subject,
-      html: message,
-      text: message.replace(/<[^>]*>/g, ""), // fallback text
+      subject: req.body.subject || "Mã OTP",
+      html: req.body.message || "<b>123456</b>",
     });
 
-    console.log("Gửi email thành công đến:", recipients);
+    await gmail.users.messages.send({
+      userId: "me",
+      requestBody: { raw },
+    });
+
+    console.log("Gmail API: Gửi thành công");
     res.json({ success: true, message: "OTP đã gửi!" });
   } catch (err) {
-    console.error("Lỗi gửi email:", err.message);
+    console.error("Lỗi Gmail API:", err.response?.data || err.message);
     res.status(500).json({ success: false, error: err.message });
   }
 });
