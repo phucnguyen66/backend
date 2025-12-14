@@ -4,36 +4,70 @@ require("dotenv").config();
 
 const app = express();
 
+/**
+ * =========================
+ * CORS CONFIG (QUAN TRỌNG)
+ * =========================
+ */
 app.use(
   cors({
     origin: [
       "http://localhost:8081",
+      "http://localhost:3000",
       "https://point-frontend.onrender.com",
+      "https://doan-10v9m0o2b-phuc55108-8103s-projects.vercel.app",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
 
+// ⚠️ BẮT PRE-FLIGHT REQUEST (FIX LỖI CORS)
+app.options("*", cors());
+
+/**
+ * =========================
+ * BODY PARSER
+ * =========================
+ */
 app.use(express.json({ limit: "20mb" }));
 
-// 📦 Import các router con
+/**
+ * =========================
+ * IMPORT ROUTERS
+ * =========================
+ */
 const uploadRouter = require("./server");
 const pointRouter = require("./point");
 const mailRouter = require("./mail");
-const scoresRouter = require("./scores"); // ✅ thêm dòng này
+const scoresRouter = require("./scores");
 
-// 📍 Gắn route
+/**
+ * =========================
+ * ROUTES
+ * =========================
+ */
 app.use("/upload", uploadRouter);
 app.use("/point", pointRouter);
 app.use("/mail", mailRouter);
-app.use("/scores", scoresRouter); // ✅ thêm dòng này
+app.use("/scores", scoresRouter);
 
-// 🧠 Route test backend
+/**
+ * =========================
+ * TEST ROUTE
+ * =========================
+ */
 app.get("/", (req, res) => {
-  res.send("✅ Point Backend is running on Railway!");
+  res.send("✅ Point Backend is running!");
 });
 
-// 🚀 Start server
+/**
+ * =========================
+ * START SERVER
+ * =========================
+ */
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server running on port ${PORT}`)
+);
