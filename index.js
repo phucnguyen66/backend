@@ -16,6 +16,7 @@ app.use(
       "http://localhost:3000",
       "https://point-frontend.onrender.com",
       "https://doan-10v9m0o2b-phuc55108-8103s-projects.vercel.app",
+      "https://doan-5c2ba1oi1-phuc55108-8103s-projects.vercel.app",
     ],
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -71,3 +72,4 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () =>
   console.log(`🚀 Server running on port ${PORT}`)
 );
+
